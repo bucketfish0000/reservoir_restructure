@@ -50,7 +50,7 @@ class reservoirModel:
         self.states,self.output=self.states[0:1],[]
         for i in range(self.training_time):
             ### at each time feed the corresponding input through ###
-            reservoir_state,output = self.forward(i)
+            reservoir_state,output = self.forward(i,self.states[-1])
             ### record everything
             self.states.append(reservoir_state)
             self.output.append(output)
@@ -67,26 +67,26 @@ class reservoirModel:
         # here X is state(i.e.input to output layer), Y is reference (system gen. output, i.e. target output from output layer)
         self.W_out = torch.tensor(np.dot(np.linalg.inv(np.dot(recorded_states.T,recorded_states)+(self.lamda*(np.eye(self.d_r)))),np.dot(recorded_states.T,reference_outputs)))
         
-    def forward(self,epoch):
+    def forward(self,epoch,prev):
         ### get corresponding input ###
         input = torch.tensor(self.system_input[epoch])
         ### filter thu input layer ###
         feed_to_reservoir = torch.tensor(np.dot(input,self.W_in))
         ### update reservoir state ###
-        state = torch.tensor(torch.tensor(np.tanh(np.dot(self.W_reservoir,self.states[-1])))+torch.tensor(feed_to_reservoir))
+        state = torch.tensor(torch.tensor(np.tanh(np.dot(self.W_reservoir,prev)))+torch.tensor(feed_to_reservoir))
         ### compute output ###
         output = torch.tensor(np.dot(state,self.W_out))
         #print(input,output)
         ### return updated reservoir state and output ###
         return state,output
     
-    def auto_forward(self,epoch):
+    def auto_forward(self,prev):
         ### get corresponding input ###
         input = torch.tensor(self.output[-1])
         ### filter thu input layer ###
         feed_to_reservoir = torch.tensor(np.dot(input,self.W_in))
         ### update reservoir state ###
-        state = torch.tensor(torch.tensor(np.tanh(np.dot(self.W_reservoir,self.states[-1])))+torch.tensor(feed_to_reservoir))
+        state = torch.tensor(torch.tensor(np.tanh(np.dot(self.W_reservoir,prev)))+torch.tensor(feed_to_reservoir))
         ### compute output ###
         output = torch.tensor(np.dot(state,self.W_out))
         ### return updated reservoir state and output ###
@@ -96,18 +96,20 @@ class reservoirModel:
         # runs from the very beginning of all inputs/datasets
         #prediction_output = []
         run_states = []
+        run_states.append(self.states[-1])
         #print("auto")
         for i in range(self.training_time,self.run_time):
-            state,prediction = self.auto_forward(i)
+            state,prediction = self.auto_forward(run_states[-1])
             self.output.append(prediction)
             run_states.append(state)
         return torch.stack(self.output),run_states
     
     def run_with_input(self):
         run_states = []
+        run_states.append(self.states[-1])
         prediction_output = []
         for i in range(self.run_time):
-            state,prediction = self.forward(i)
+            state,prediction = self.forward(i,run_states[-1])
             prediction_output.append(prediction)
             run_states.append(state)
         return torch.stack(prediction_output),run_states
