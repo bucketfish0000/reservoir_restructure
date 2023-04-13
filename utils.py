@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
-def discreteLorenz(params=(10,28,8/3),init=(25,25,25), epoch=3000,delta_t=0.01,dimension=3):
+def discrete_lorenz(params=(10,28,8/3),init=(25,25,25), epoch=3000,delta_t=0.01,dimension=3):
     result = []
     result.append(init)
     for i in range(0,epoch):
@@ -13,19 +13,18 @@ def discreteLorenz(params=(10,28,8/3),init=(25,25,25), epoch=3000,delta_t=0.01,d
         result.append(curr)
     return result
 
-def integrationLorenz(params=(10,28,8/3),init=(25,25,25), epoch=300,delta_t=0.1,dimension=3):
-    lorenz=solve_ivp(dynamicLorenz,(0,epoch),(init[0],init[1],init[2]),args=(params[0],params[1],params[2]),dense_output=True)
+def integration_lorenz(params=(10,28,8/3),init=(25,25,25), epoch=300,delta_t=0.1,dimension=3):
+    lorenz=solve_ivp(dynamic_lorenz,(0,epoch),(init[0],init[1],init[2]),args=(params[0],params[1],params[2]),dense_output=True)
     time=np.linspace(0,epoch*delta_t,epoch)
     #x,y,z=lorenz.sol(time)
     return lorenz.sol(time),time
 
-def dynamicLorenz(t,init,a,b,c):
+def dynamic_lorenz(t,init,a,b,c):
     x,y,z=init
     dx=a*(y-x)
     dy=(b-z)*x-y
     dz=-c*z+x*y
     return dx,dy,dz
-
 
 ######## WASTED ###########
 def plot(values,time,dimension=3):

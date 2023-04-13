@@ -17,7 +17,7 @@ class reservoirModel:
         self.d_m=config["system"]["dimension"]
         self.d_r=config["reservoir"]["dimension"]
         #self.system=config["system"]["dynamics"]
-        self.system=utils.integrationLorenz
+        self.system=utils.integration_lorenz
 
         ### generate system input ###
         self.system_input,self.time = self.system(epoch=350,delta_t=0.1)
