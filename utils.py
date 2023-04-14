@@ -1,17 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
-
-def discrete_lorenz(params=(10,28,8/3),init=(25,25,25), epoch=3000,delta_t=0.01,dimension=3):
-    result = []
-    result.append(init)
-    for i in range(0,epoch):
-        prev = result[i-1]
-        curr = [prev[0]+delta_t*(params[0]*(prev[1]-prev[0])),
-                prev[1]+delta_t*(prev[0]*(params[1]-prev[2])-prev[1]),
-                prev[2]+delta_t*(prev[0]*prev[1]-params[2]*prev[2])]
-        result.append(curr)
-    return result
+import math
+import torch
 
 def integration_lorenz(params=(10,28,8/3),init=(25,25,25), epoch=300,delta_t=0.1,dimension=3):
     lorenz=solve_ivp(dynamic_lorenz,(0,epoch),(init[0],init[1],init[2]),args=(params[0],params[1],params[2]),dense_output=True)
@@ -26,22 +17,50 @@ def dynamic_lorenz(t,init,a,b,c):
     dz=-c*z+x*y
     return dx,dy,dz
 
-######## WASTED ###########
-def plot(values,time,dimension=3):
-    t = 0
-    
-    for seq in values:
-        data = []
-        for i in range(dimension):
-            data.append([])   
-        for vect in seq:
-            for i in range(dimension):
-                data[i].append(vect[i])
-        plt.subplot(311)
-        plt.plot(time,data[0])
-        plt.subplot(312)
-        plt.plot(time,data[1])
-        plt.subplot(313)
-        plt.plot(time,data[2])
-    
+def time_dynamic_system(params=(10,28,8/3),init=(25,25,25), epoch=300,delta_t=0.1,dimension=3,system=dynamic_lorenz):
+    sequence=solve_ivp(system,(0,epoch),(init[0],init[1],init[2]),args=(params[0],params[1],params[2]),dense_output=True)
+    time=np.linspace(0,epoch*delta_t,epoch)
+    return sequence.sol(time),time
+
+
+def evaluation(start_index,end_index,f,prediction,reference):
+    errors=[]
+    for i in range(start_index,end_index):
+        error=np.linalg.norm(torch.tensor(prediction[i])-torch.tensor(reference))/np.linalg.norm(torch.tensor(reference))
+        errors.append(error)
+    return errors
+
+def plot_time_sequence(start_index,end_index,f,prediction,reference,time,dimensions):
+    rows=dimensions
+    errors = evaluation(start_index,end_index,f,prediction,reference)
+    fig=plt.figure()
+    fig.set_figwidth(40)
+    fig.set_figheight(15)
+    for i in range(rows):
+        ax = fig.add_subplot(rows+1,1,i+1)
+        ax.plot(time[start_index:end_index],reference.T[i][start_index:end_index])
+        ax.plot(time[start_index:end_index],prediction.T[i][start_index:end_index])
+        #ax.vlines(x = time[separation_index],ymin=-20,ymax=20,colors = 'purple',linestyles='dashed')
+    ax = fig.add_subplot(rows+1,1,rows+1)
+    ax.plot(time[start_index:end_index],errors)
     plt.show()
+
+def discrete_mackey_glass(params=(0.2,0.1,10,23,1000,.46,250),init=0,epoch=3000,delta_t=0.02):
+    ### https://github.com/manu-mannattil/nolitsa/blob/master/nolitsa/data.py
+    a,b,c,tau,n,sample,discard = params
+    sample=int(n*sample/tau)
+
+    grids = n * discard + sample * epoch
+    x = np.empty(grids)
+
+    x[:n] = 0.5 + 0.05 * (-1 + 2 * np.random.random(n))
+
+    A = (2 * n - b * tau) / (2 * n + b * tau)
+    B = a * tau / (2 * n + b * tau)
+
+    for i in range(n - 1, grids - 1):
+        x[i + 1] = A * x[i] + B * (x[i - n] / (1 + x[i - n] ** c) +
+                                   x[i - n + 1] / (1 + x[i - n + 1] ** c))
+        
+    time=np.linspace(0,epoch*delta_t,epoch)
+    return x[n * discard::sample],time
