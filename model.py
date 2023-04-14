@@ -24,7 +24,6 @@ class reservoirModel:
 
         ### generate system input ###
         self.system_input,self.time = self.system(epoch=self.run_time,delta_t=self.d_t)
-        print(type(self.system_input))
         self.system_input=torch.tensor(self.system_input.T)
         ### initialize input layer ###
         sigma = config["params"]["sigma"]
@@ -109,7 +108,7 @@ class reservoirModel:
 
     def run_by_self(self):
         # runs from the very beginning of all inputs/datasets
-        #prediction_output = []print
+        #prediction_output = []
         run_states = []
         run_states.append(self.states[-1])
         for i in range(self.training_time,self.run_time):
