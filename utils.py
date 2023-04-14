@@ -63,4 +63,6 @@ def discrete_mackey_glass(params=(0.2,0.1,10,23,1000,.46,250),init=0,epoch=3000,
                                    x[i - n + 1] / (1 + x[i - n + 1] ** c))
         
     time=np.linspace(0,epoch*delta_t,epoch)
-    return x[n * discard::sample],time
+    sequence = []
+    sequence.append(list(x[n*discard::sample]))
+    return np.array(sequence),time

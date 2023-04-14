@@ -24,6 +24,7 @@ class reservoirModel:
 
         ### generate system input ###
         self.system_input,self.time = self.system(epoch=self.run_time,delta_t=self.d_t)
+        print(type(self.system_input))
         self.system_input=torch.tensor(self.system_input.T)
         ### initialize input layer ###
         sigma = config["params"]["sigma"]
@@ -39,7 +40,7 @@ class reservoirModel:
         self.states.append(torch.tensor(np.random.rand(self.d_r))) # use a random state as start
 
         ### initialize output layer ###
-        self.W_out=self.initOutLayer()
+        self.W_out=self.init_out_layer()
 
         ### initialize output list ###
         self.output=[]
@@ -56,10 +57,10 @@ class reservoirModel:
         self.states,self.output=self.states[0:1],[]
         for i in range(self.training_time):
             ### at each time feed the corresponding input through ###
-            reservoir_state,output = self.forward(i,torch.reshape(self.states[-1],[-1]))
+            reservoir_state,output = self.forward(i,self.states[-1])
             ### record everything
-            self.states.append(torch.reshape(reservoir_state,[-1]))
-            self.output.append(torch.reshape(output,[-1]))
+            self.states.append(reservoir_state)
+            self.output.append(output)
         ### do ridge regression ###
         # convert everything to tensors
         recorded_states = torch.stack(self.states[1:])
@@ -112,9 +113,9 @@ class reservoirModel:
         run_states = []
         run_states.append(self.states[-1])
         for i in range(self.training_time,self.run_time):
-            state,prediction = self.auto_forward(torch.reshape(run_states[-1],[-1]))
-            self.output.append(torch.reshape(prediction,[-1]))
-            run_states.append(torch.reshape(state,[-1]))
+            state,prediction = self.auto_forward(run_states[-1])
+            self.output.append(prediction)
+            run_states.append(state)
         return torch.stack(self.output),run_states
     
     def run_with_input(self):
@@ -122,9 +123,9 @@ class reservoirModel:
         run_states.append(self.states[-1])
         prediction_output = []
         for i in range(self.run_time):
-            state,prediction = self.forward(i,torch.reshape(run_states[-1],[-1]))
-            prediction_output.append(torch.reshape(prediction,[-1]))
-            run_states.append(torch.reshape(state,[-1]))
+            state,prediction = self.forward(i,run_states[-1])
+            prediction_output.append(prediction)
+            run_states.append(state)
         return torch.stack(prediction_output),run_states
     
 
@@ -147,7 +148,7 @@ class reservoirModel:
         W_reservoir=(roh/max_eigen)*(torch.tensor(W_reservoir))
         return W_reservoir
     
-    def initOutLayer(self):
+    def init_out_layer(self):
         return torch.tensor(np.random.rand(self.d_r,self.d_m))        
             
 
