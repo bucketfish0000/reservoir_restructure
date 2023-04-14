@@ -27,12 +27,12 @@ class reservoirModel:
         self.system_input=torch.tensor(self.system_input.T)
         ### initialize input layer ###
         sigma = config["params"]["sigma"]
-        self.W_in=self.initInLayer(sigma)
+        self.W_in=self.init_in_layer(sigma)
 
         ### initialize reservoir weights ###
         roh = config["params"]["roh"]
         reservoir_degree=config["reservoir"]["degree"]
-        self.W_reservoir=self.initReservoir(roh,reservoir_degree)
+        self.W_reservoir=self.init_reservoir(roh,reservoir_degree)
 
         ### initialize reservoir states ###
         self.states=[] # list of tensors; states[i] is state vect of reservoir at time=i
@@ -56,10 +56,10 @@ class reservoirModel:
         self.states,self.output=self.states[0:1],[]
         for i in range(self.training_time):
             ### at each time feed the corresponding input through ###
-            reservoir_state,output = self.forward(i,self.states[-1])
+            reservoir_state,output = self.forward(i,torch.reshape(self.states[-1],[-1]))
             ### record everything
-            self.states.append(reservoir_state)
-            self.output.append(output)
+            self.states.append(torch.reshape(reservoir_state,[-1]))
+            self.output.append(torch.reshape(output,[-1]))
         ### do ridge regression ###
         # convert everything to tensors
         recorded_states = torch.stack(self.states[1:])
@@ -68,7 +68,7 @@ class reservoirModel:
         # compute the regression of outputs generated from inputs[t_0=0,t_e=e]
         # against the references from [t_0=1,t_e=e+1]
         reference_outputs = torch.tensor(self.system_input[1:self.training_time+1]) 
-        print(len(reference_outputs))
+        #print(len(reference_outputs))
         # beta_hat = (X^T*X+lamda*I)^-1*(X^T*Y)fig2=plt.figure()
         # here X is state(i.e.input to output layer), Y is reference (system gen. output, i.e. target output from output layer)
 
@@ -81,6 +81,7 @@ class reservoirModel:
         '''
         
     def forward(self,epoch,prev):
+        #print(len(prev))
         ### get corresponding input ###
         input = torch.tensor(self.system_input[epoch])
         ### filter thru input layer ###
@@ -89,6 +90,7 @@ class reservoirModel:
         state = torch.tensor(torch.tensor(np.tanh(torch.tensor(np.dot(self.W_reservoir,prev))+torch.tensor(feed_to_reservoir))))
         ### compute output ###
         output = torch.tensor(np.dot(state,self.W_out))
+        #print(state)
         ### return updated reservoir state and output ###
         return state,output
     
@@ -110,9 +112,9 @@ class reservoirModel:
         run_states = []
         run_states.append(self.states[-1])
         for i in range(self.training_time,self.run_time):
-            state,prediction = self.auto_forward(run_states[-1])
-            self.output.append(prediction)
-            run_states.append(state)
+            state,prediction = self.auto_forward(torch.reshape(run_states[-1],[-1]))
+            self.output.append(torch.reshape(prediction,[-1]))
+            run_states.append(torch.reshape(state,[-1]))
         return torch.stack(self.output),run_states
     
     def run_with_input(self):
@@ -120,16 +122,16 @@ class reservoirModel:
         run_states.append(self.states[-1])
         prediction_output = []
         for i in range(self.run_time):
-            state,prediction = self.forward(i,run_states[-1])
-            prediction_output.append(prediction)
-            run_states.append(state)
+            state,prediction = self.forward(i,torch.reshape(run_states[-1],[-1]))
+            prediction_output.append(torch.reshape(prediction,[-1]))
+            run_states.append(torch.reshape(state,[-1]))
         return torch.stack(prediction_output),run_states
     
 
-    def initInLayer(self,sigma):
+    def init_in_layer(self,sigma):
         return torch.tensor(np.random.uniform(-sigma,sigma,(self.d_m,self.d_r)))
     
-    def initReservoir(self,roh,reservoir_degree):
+    def init_reservoir(self,roh,reservoir_degree):
         W_reservoir = np.zeros((self.d_r,self.d_r))
         for node in W_reservoir:
             # random degree for each node around <d>
