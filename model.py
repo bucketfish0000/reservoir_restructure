@@ -70,7 +70,7 @@ class reservoirModel:
         # against the references from [t_0=1,t_e=e+1]
         reference_outputs = torch.tensor(self.system_input[1:self.training_time+1]) 
         #print(len(reference_outputs))
-        # beta_hat = (X^T*X+lamda*I)^-1*(X^T*Y)fig2=plt.figure()
+        # beta_hat = (X^T*X+lamda*I)^-1*(X^T*Y)
         # here X is state(i.e.input to output layer), Y is reference (system gen. output, i.e. target output from output layer)
 
         self.W_out = torch.tensor(np.dot(np.linalg.inv(torch.tensor(np.dot(recorded_states.T,recorded_states))+torch.tensor(self.lamda*(np.eye(self.d_r)))),np.dot(recorded_states.T,reference_outputs)))

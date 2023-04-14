@@ -30,7 +30,7 @@ def evaluation(start_index,end_index,f,prediction,reference):
         errors.append(error)
     return errors
 
-def plot_time_sequence(start_index,end_index,f,prediction,reference,time,dimensions):
+def plot_time_sequence(start_index,end_index,break_index,f,prediction,reference,time,dimensions):
     rows=dimensions
     errors = evaluation(start_index,end_index,f,prediction,reference)
     fig=plt.figure()
@@ -40,7 +40,7 @@ def plot_time_sequence(start_index,end_index,f,prediction,reference,time,dimensi
         ax = fig.add_subplot(rows+1,1,i+1)
         ax.plot(time[start_index:end_index],reference.T[i][start_index:end_index])
         ax.plot(time[start_index:end_index],prediction.T[i][start_index:end_index])
-        #ax.vlines(x = time[separation_index],ymin=-20,ymax=20,colors = 'purple',linestyles='dashed')
+        plt.axvline(x = time[break_index], color = 'b',linestyle='dashed')
     ax = fig.add_subplot(rows+1,1,rows+1)
     ax.plot(time[start_index:end_index],errors)
     plt.show()
