@@ -6,7 +6,7 @@ import torch
 
 
 def integration_lorenz(
-    bias_value,bias = True,params=(10, 28, 8 / 3), init=(25, 25, 25), epoch=300, delta_t=0.01, dimension=3
+    params=(10, 28, 8 / 3), init=(25, 25, 25), epoch=300, delta_t=0.01,
 ):
     lorenz = solve_ivp(
         dynamic_lorenz,
@@ -15,12 +15,11 @@ def integration_lorenz(
         args=(params[0], params[1], params[2]),
         dense_output=True,
     )
+    bias_value = 1.0
     time = np.linspace(0, epoch * delta_t, epoch)
     lorenz_system = lorenz.sol(time)
-    if bias:
-        lorenz_system=np.append(lorenz_system,[np.full(len(lorenz_system[0]),bias_value)],axis=0)
-    print(lorenz_system)
-    return lorenz_system, time
+    lorenz_system = np.append(lorenz_system,[np.full(len(lorenz_system[0]),bias_value)],axis=0)
+    return lorenz_system.T, time
 
 
 def dynamic_lorenz(t, init, a, b, c):
@@ -32,13 +31,10 @@ def dynamic_lorenz(t, init, a, b, c):
 
 
 def time_dynamic_system(
-    bias_value,
-    bias = True,
     params=(10, 28, 8 / 3),
     init=(25, 25, 25),
     epoch=300,
     delta_t=0.1,
-    dimension=3,
     system=dynamic_lorenz,
 ):
     sequence = solve_ivp(
@@ -64,9 +60,9 @@ def evaluation(start_index, end_index, f, prediction, reference):
 
 
 def plot_time_sequence(
-    start_index, end_index, break_index, f, prediction, reference, time, dimensions
+    start_index, end_index, break_index, prediction, reference, time, dimensions
 ):
-    
+
     rows = dimensions
     #errors = evaluation(start_index,end_index,f,prediction,reference)
     fig = plt.figure()
