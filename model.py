@@ -127,7 +127,6 @@ class reservoirModel:
                 np.tanh(
                     torch.tensor(np.dot(self.W_reservoir, prev))
                     + torch.tensor(feed_to_reservoir)
-                    + self.bias
                 )
             )
         )
