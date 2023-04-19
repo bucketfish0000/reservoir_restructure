@@ -6,7 +6,13 @@ import torch
 
 
 def integration_lorenz(
-    bias_value,bias = True,params=(10, 28, 8 / 3), init=(25, 25, 25), epoch=300, delta_t=0.01, dimension=3
+    bias_value,
+    bias=True,
+    params=(10, 28, 8 / 3),
+    init=(25, 25, 25),
+    epoch=300,
+    delta_t=0.01,
+    dimension=3,
 ):
     lorenz = solve_ivp(
         dynamic_lorenz,
@@ -18,7 +24,9 @@ def integration_lorenz(
     time = np.linspace(0, epoch * delta_t, epoch)
     lorenz_system = lorenz.sol(time)
     if bias:
-        lorenz_system=np.append(lorenz_system,[np.full(len(lorenz_system[0]),bias_value)],axis=0)
+        lorenz_system = np.append(
+            lorenz_system, [np.full(len(lorenz_system[0]), bias_value)], axis=0
+        )
     print(lorenz_system)
     return lorenz_system, time
 
@@ -33,7 +41,7 @@ def dynamic_lorenz(t, init, a, b, c):
 
 def time_dynamic_system(
     bias_value,
-    bias = True,
+    bias=True,
     params=(10, 28, 8 / 3),
     init=(25, 25, 25),
     epoch=300,
@@ -55,7 +63,7 @@ def time_dynamic_system(
 def evaluation(start_index, end_index, f, prediction, reference):
     errors = []
     for i in range(start_index, end_index):
-        #print(np.shape(prediction[i]),np.shape(reference))
+        # print(np.shape(prediction[i]),np.shape(reference))
         error = np.linalg.norm(
             torch.tensor(prediction[i]) - torch.tensor(reference)
         ) / np.linalg.norm(torch.tensor(reference))
@@ -66,9 +74,9 @@ def evaluation(start_index, end_index, f, prediction, reference):
 def plot_time_sequence(
     start_index, end_index, break_index, f, prediction, reference, time, dimensions
 ):
-    
+
     rows = dimensions
-    #errors = evaluation(start_index,end_index,f,prediction,reference)
+    # errors = evaluation(start_index,end_index,f,prediction,reference)
     fig = plt.figure()
     fig.set_figwidth(40)
     fig.set_figheight(15)
@@ -77,13 +85,18 @@ def plot_time_sequence(
         ax.plot(time[start_index:end_index], reference.T[i][start_index:end_index])
         ax.plot(time[start_index:end_index], prediction.T[i][start_index:end_index])
         plt.axvline(x=time[break_index], color="b", linestyle="dashed")
-    #ax = fig.add_subplot(rows+1,1,rows+1)
-    #ax.plot(time[start_index:end_index],errors)
+    # ax = fig.add_subplot(rows+1,1,rows+1)
+    # ax.plot(time[start_index:end_index],errors)
     plt.show()
 
 
 def discrete_mackey_glass(
-    params=(0.2, 0.1, 10, 20, 1000, 0.46, 250), init=0, epoch=3000, delta_t=0.02
+    params=(0.2, 0.1, 10, 20, 1000, 0.46, 250),
+    init=0,
+    epoch=3000,
+    delta_t=0.02,
+    bias=True,
+    bias_value=0.02,
 ):
     ### https://github.com/manu-mannattil/nolitsa/blob/master/nolitsa/data.py
     a, b, c, tau, n, sample, discard = params
@@ -105,4 +118,7 @@ def discrete_mackey_glass(
     time = np.linspace(0, epoch * delta_t, epoch)
     sequence = []
     sequence.append(list(x[n * discard :: sample]))
+    # sequence = np.array(sequence)
+    if bias:
+        sequence = np.append(sequence, [np.full(len(sequence[0]), bias_value)], axis=0)
     return np.array(sequence), time

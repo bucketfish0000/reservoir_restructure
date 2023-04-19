@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 class reservoirModel:
     def __init__(self, config_path):
-        #np.random.seed(1024)
+        # np.random.seed(1024)
         global config
         with open(config_path) as config_file:
             config = json.load(config_file, object_pairs_hook=OrderedDict)
@@ -20,7 +20,7 @@ class reservoirModel:
         self.d_t = config["system"]["d_t"]
         self.system = eval(config["system"]["function"])
         self.bias = config["params"]["bias"]
-        if (self.bias==None):
+        if self.bias == None:
             self.bias_dimension = 0
         else:
             self.bias_dimension = 1
@@ -30,7 +30,10 @@ class reservoirModel:
 
         ### generate system input ###
         self.system_input, self.time = self.system(
-            epoch=self.run_time, delta_t=self.d_t,bias = (not(self.bias==None)),bias_value = self.bias
+            epoch=self.run_time,
+            delta_t=self.d_t,
+            bias=(not (self.bias == None)),
+            bias_value=self.bias,
         )
         self.system_input = torch.tensor(self.system_input.T)
         ### initialize input layer ###
@@ -43,14 +46,14 @@ class reservoirModel:
         self.network_function = eval(config["reservoir"]["network"])
         self.W_reservoir = self.network_function(rho, reservoir_degree)
         self.subsample = eval(config["reservoir"]["subsample"])
-        #self.bias = config["params"]["bias"]
+        # self.bias = config["params"]["bias"]
         if self.subsample == None:
             self.sample_size = self.d_r
         else:
             self.sample_size = 2 * self.subsample
         self.sample_entries = np.random.randint(
-                low=0, high=self.d_r, size=self.subsample
-            )
+            low=0, high=self.d_r, size=self.subsample
+        )
         ### initialize reservoir states ###
         self.states = (
             []
@@ -164,7 +167,9 @@ class reservoirModel:
         return torch.stack(prediction_output), run_states
 
     def init_in_layer(self, sigma):
-        return torch.tensor(np.random.uniform(-sigma, sigma, (self.d_m+self.bias_dimension, self.d_r)))
+        return torch.tensor(
+            np.random.uniform(-sigma, sigma, (self.d_m + self.bias_dimension, self.d_r))
+        )
 
     def random_init_reservoir(self, rho, reservoir_degree):
         W_reservoir = np.zeros((self.d_r, self.d_r))
@@ -190,10 +195,14 @@ class reservoirModel:
 
     def init_out_layer(self):
         if self.subsample == None:
-            return torch.tensor(np.random.rand(self.d_r, self.d_m+self.bias_dimension))
+            return torch.tensor(
+                np.random.rand(self.d_r, self.d_m + self.bias_dimension)
+            )
         else:
 
-            return torch.tensor(np.random.rand(2 * self.subsample, self.d_m+self.bias_dimension))
+            return torch.tensor(
+                np.random.rand(2 * self.subsample, self.d_m + self.bias_dimension)
+            )
 
     def sample_from_reservoir(self, state):
         # subsample from reservoir with non-lin augmentation
