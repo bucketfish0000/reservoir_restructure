@@ -2,15 +2,9 @@ Run `reservoir.ipynb` to train and auto-run the RP model as well as make a plot 
 
 TODO:
 
-    0. put the todo into issues
     0.5. testcases
     
-    1. subsample
-    2. non-lin samples to output
     3. mackey-glass fix
-    4. modulize/flexible network gen
-    5. black formatting
-    6. bias
 
 ----
 
