@@ -107,6 +107,4 @@ def discrete_mackey_glass(
     sequence = []
     sequence.append(list(x[n * discard :: sample]))
     # sequence = np.array(sequence)
-    if bias:
-        sequence = np.append(sequence, [np.full(len(sequence[0]), bias_value)], axis=0)
-    return np.array(sequence), time
+    return np.array(sequence).T, time

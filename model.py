@@ -19,9 +19,9 @@ class ReservoirModel:
 
         ### initialize reservoir weights ###
         rho = config["params"]["rho"]
-        reservoir_degree = config["reservoir"]["degree"]
+        reservoir_sparsity = config["reservoir"]["sparsity"]
         self.network_function = self.random_init_reservoir
-        self.W_reservoir = self.network_function(rho, reservoir_degree)
+        self.W_reservoir = self.network_function(rho, reservoir_sparsity)
         self.subsample = int(config["reservoir"]["subsample"])
         if self.subsample == None:
             self.sample_size = self.d_r
@@ -130,25 +130,16 @@ class ReservoirModel:
     def init_in_layer(self, sigma):
         return torch.tensor(np.random.uniform(-sigma, sigma, (self.d_m, self.d_r)))
 
-    def random_init_reservoir(self, rho, reservoir_degree):
-        # TODO: Make it free function
+    def random_init_reservoir(self,rho,sparsity):
         W_reservoir = np.zeros((self.d_r, self.d_r))
-        for node in W_reservoir:
-            # random degree for each node around <d>
-            # FIXME: Instead of reservoir_degree, the parameter we want have direct control is number_connections itself.
-            number_connections = round(
-                max(0, np.random.normal(reservoir_degree, reservoir_degree / 3, 1)[0])
-            )
-            # make random connections according to weight
-            connections = np.random.choice(
-                np.linspace(0, self.d_r - 1, self.d_r, dtype=np.int_),
-                number_connections,
-                replace=False,
-            )
-            # random connection weight
-            for connection in connections:
-                node[connection] = np.random.uniform(-1, 1)
 
+        edge_number = round(sparsity * self.d_r**2)
+        edge_row_indices=np.random.choice(np.linspace(0, self.d_r - 1, self.d_r, dtype=np.int),edge_number,replace=True)
+        edge_column_indices=np.random.choice(np.linspace(0, self.d_r - 1, self.d_r, dtype=np.int),edge_number,replace=True)
+        for row,column in zip(edge_row_indices,edge_column_indices):
+            W_reservoir[row][column] = np.random.uniform(-1, 1)
+
+        
         # re-normalize W_reservoir to rho
         max_eigen = max(np.abs(np.linalg.eig(W_reservoir)[0]))
         W_reservoir = (rho / max_eigen) * (torch.tensor(W_reservoir))
