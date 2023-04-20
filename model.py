@@ -30,6 +30,9 @@ class ReservoirModel:
         self.sample_entries = np.random.randint(
             low=0, high=self.d_r, size=self.subsample
         )
+
+        self.leakage = config["reservoir"]["leakage"]
+        self.time_const = config["reservoir"]["time const"]
         ### initialize reservoir states ###
         self.states = ([self.initialize_state])
 
@@ -88,6 +91,11 @@ class ReservoirModel:
         ### update reservoir state ###
         state = torch.tensor(
             torch.tensor(
+                (1-self.time_const*self.leakage)*prev
+            )
+            +
+            torch.tensor(
+                self.time_const*
                 np.tanh(
                     torch.tensor(np.dot(self.W_reservoir, prev))
                     + torch.tensor(feed_to_reservoir)
