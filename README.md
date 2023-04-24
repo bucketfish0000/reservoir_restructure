@@ -6,6 +6,13 @@ TODO:
     
     3. mackey-glass fix
 
+    - aim(python)
+
+    -learning curve & lyapunov
+    
+    -qualities
+
+
 ----
 
 form of configs:

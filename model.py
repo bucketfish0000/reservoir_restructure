@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 
-class ReservoirModel:
+class ESNModel:
     def __init__(self, config, seed=None):
         np.random.seed(seed)  # FIXME: Use np.random.default_rng
 
@@ -91,11 +91,11 @@ class ReservoirModel:
         ### update reservoir state ###
         state = torch.tensor(
             torch.tensor(
-                (1-self.time_const*self.leakage)*prev
+                (1-self.leakage)*prev
             )
             +
             torch.tensor(
-                self.time_const*
+                self.leakage*
                 np.tanh(
                     torch.tensor(np.dot(self.W_reservoir, prev))
                     + torch.tensor(feed_to_reservoir)
