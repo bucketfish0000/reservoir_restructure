@@ -9,6 +9,7 @@ TODO:
     - aim(python)
 
     -learning curve & lyapunov
+    x
     
     -qualities
 
