@@ -67,6 +67,7 @@ class ESNModel:
             if qualification != 0 and input_count%(self.training_time/qualification):
                 sub_ESN = copy.deepcopy(self)
                 _,_ = sub_ESN.ridge_output_layer(observation_list,expected_data)
+                sub_ESN.training_time=input_count
                 subtrained.append(sub_ESN)
 
         loss,loss_before_training = self.ridge_output_layer(observation_list,expected_data)
