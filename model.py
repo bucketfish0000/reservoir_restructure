@@ -2,7 +2,7 @@ import os
 import utils
 import numpy as np
 import torch
-
+import copy
 
 class ESNModel:
     def __init__(self, config, seed=None):
@@ -45,20 +45,35 @@ class ESNModel:
     def initialize_state(self):
         return torch.tensor(np.random.rand(self.d_r))
 
-    def training(self, data):
+    def training(self, data, qualification=0):
         ### initialize ###
         training_data = data[:self.training_time]
         expected_data = data[1:self.training_time+1]
+        subtrained = []
+        input_count = 0
+
 
         observation_list = []
         prev_state = self.initialize_state()
         for inputs in training_data:
+            input_count += 1
             ### at each time feed the corresponding input through ###
             prev_state, sample, _ = self.forward(
                 prev_state, torch.tensor(inputs)
             )
             ### record 
             observation_list.append(sample)
+            ### record subtrained for learning curve
+            if qualification != 0 and input_count%(self.training_time/qualification):
+                sub_ESN = copy.deepcopy(self)
+                _,_ = sub_ESN.ridge_output_layer(observation_list,expected_data)
+                subtrained.append(sub_ESN)
+
+        loss,loss_before_training = self.ridge_output_layer(observation_list,expected_data)
+
+        return loss, loss_before_training, subtrained
+
+    def ridge_output_layer(self,observation_list,expected_data,):
         ### do ridge regression ###
         recorded_samples = torch.stack(observation_list)
         # we are making predictions so it is needed to
@@ -78,10 +93,9 @@ class ESNModel:
                 np.dot(recorded_samples.T, reference_outputs),
             )
         )
-
         loss = np.linalg.norm(reference_outputs - recorded_samples @ self.W_out, axis=1).mean()
         return loss, loss_before_training
-
+    
     def forward(self, prev, input):
         # print(len(prev))
         ### get corresponding input ###
