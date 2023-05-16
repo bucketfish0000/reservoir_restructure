@@ -59,15 +59,20 @@ multi-measure and average/smoothened
 Theorem 5.1. Let r be the rank of the n × s matrix consisting
 of the s vectors xu (t0 ) for all inputs u in S_univ (we assume that
 S_univ is finite and contains s inputs). Then r ≤ VC-dimension
-(HC ) ≤ r + 1.
+(H_C) ≤ r + 1.
 
 We propose to use the rank r defined in Theorem 5.1 as
-an estimate of VC-dimension (HC ), and hence as a measure
+an estimate of VC-dimension (H_C), and hence as a measure
 that informs us about the generalization capability of a neural
 microcircuit C (for arbitrary probability distributions over the
 set S_univ ).
 
     <https://arxiv.org/pdf/1810.07135.pdf>
-    <https://www.sciencedirect.com/science/article/pii/S0893608007000433?via%3Dihub>
+    <https://www.sciencedirect.com/science/article/pii/S0893608007000433?via%3Dihub> - 5 and 6
 
--MC: 
+-MC: Memory capacity is bounded by ESN size but tighter bound gives by summing up the correlation of network state to history at each point.
+
+<https://www.ai.rug.nl/minds/uploads/STMEchoStatesTechRep.pdf>
+
+
+
