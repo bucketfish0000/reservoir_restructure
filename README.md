@@ -1,4 +1,4 @@
-Run `reservoir.ipynb` to train and auto-run the RP model as well as make a plot of outputs in time. See more in the file.
+Run `reservoir.ipynb` to train and auto-run the RC model as well as make a plot of outputs in time. See more in the file.
 
 TODO:
 
@@ -7,11 +7,10 @@ TODO:
     3. mackey-glass fix
 
     - aim(python)
-
-    -learning curve & lyapunov
-    x
     
-    -qualities
+    - qualities(KR,GR,MC) with standarized test forwarding
+
+    - data pipelines
 
 
 ----
@@ -27,7 +26,7 @@ form of configs: (expired)
         },
         "reservoir": {
             "dimension": <int>,
-            "degree": <int> avg/expected degree,
+            "degree": <int> avg/expected degree,python -m pip install --upgrade pip
             "subsample": <int> # of subsampled dimensions (None for no subsampling)
             "network": <string> func name and call path to generate r network (None for default random)
         },
@@ -67,8 +66,13 @@ that informs us about the generalization capability of a neural
 microcircuit C (for arbitrary probability distributions over the
 set S_univ ).
 
+The GR is a measure of the reservoir’s capability to generalize given similar input streams. It is
+calculated using the same rank measure as kernel quality, however each input stream ui+1 , . . . , um
+is a noisy version of the original ui . A low generalization rank symbolizes a robust ability to map
+similar inputs to similar reservoir states.`
+
     <https://arxiv.org/pdf/1810.07135.pdf>
-    <https://www.sciencedirect.com/science/article/pii/S0893608007000433?via%3Dihub> - 5 and 6
+    <https://www.sciencedirect.com/science/article/pii/S0893608007000433?via%3Dihub> - 5, 6 and appendix-c
 
 -MC: Memory capacity is bounded by ESN size but tighter bound gives by summing up the correlation of network state to history at each point.
 

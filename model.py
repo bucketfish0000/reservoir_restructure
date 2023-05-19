@@ -125,30 +125,33 @@ class ESNModel:
         ### return updated reservoir state and output ###
         return state, sample, output
 
-    def run_by_self(self, data):
+    def run(self, data, data_driven_length, self_driven_length):
         # runs from the very beginning of all inputs/datasets
         # prediction_output = []
         output_list = []
-        training_data = data[:self.training_time]
+        subsample_list = []
+        data_slice = data[:data_driven_length]
 
         # Load internal states to remember the past dynamics
         prev_state = self.initialize_state()
-        for inputs in training_data:
+        for inputs in data_slice:
             prev_state, sample, prediction = self.forward(
                 prev_state, torch.tensor(inputs)
             )
             output = sample @ self.W_out
             output_list.append(output)
+            subsample_list.append(sample)
 
         # Predict based on generated past states
-        for i in range(self.training_time, self.run_time):
+        for i in range(data_driven_length, data_driven_length+self_driven_length):
             prev_state, sample, prediction = self.forward(
                 prev_state, torch.tensor(output)
             )
             output = sample @ self.W_out
             output_list.append(output)
+            subsample_list.append(sample)
 
-        return torch.stack(output_list)
+        return torch.stack(output_list),torch.stack(subsample_list)
 
     def init_in_layer(self, sigma):
         return torch.tensor(np.random.uniform(-sigma, sigma, (self.d_m, self.d_r)))
