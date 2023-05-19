@@ -34,9 +34,16 @@ def config_space(model,noise_factor = 10, tests = 20, matrix_size = 500):
     noisy_inputs = noise_factor*inputs
     outputs,subsamples = model.run(inputs,tests*matrix_size,0)
     #KR
-    for i in np.linspace(0,len(outputs),)
-    
-
+    for i in np.linspace(0,len(outputs),num=tests):
+        kernel = subsamples[i:i+matrix_size]
+        KR += np.linalg.matrix_rank(kernel)
+    KR /=tests
+    noisy_outputs, noisy_subsamples = model.run(noisy_inputs,tests*matrix_size,0)
+    #GR
+    for i in np.linspace(0,len(outputs),num=tests):
+        kernel = noisy_subsamples[i:i+matrix_size]
+        GR += np.linalg.matrix_rank(kernel)
+    GR /=tests
     return KR,GR,MC
 
 
