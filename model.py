@@ -63,10 +63,11 @@ class ESNModel:
             )
             ### record 
             observation_list.append(sample)
+            #print(input_count,input_count%(self.training_time/qualification))
             ### record subtrained for learning curve
-            if qualification != 0 and input_count%(self.training_time/qualification):
+            if qualification != 0 and (input_count%(self.training_time/qualification))==0:
                 sub_ESN = copy.deepcopy(self)
-                _,_ = sub_ESN.ridge_output_layer(observation_list,expected_data)
+                _,_ = sub_ESN.ridge_output_layer(observation_list,expected_data[:input_count])
                 sub_ESN.training_time=input_count
                 subtrained.append(sub_ESN)
 
@@ -94,6 +95,7 @@ class ESNModel:
                 np.dot(recorded_samples.T, reference_outputs),
             )
         )
+        #print(recorded_samples.T.shape,reference_outputs.shape)
         loss = np.linalg.norm(reference_outputs - recorded_samples @ self.W_out, axis=1).mean()
         return loss, loss_before_training
     
