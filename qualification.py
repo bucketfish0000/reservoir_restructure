@@ -30,7 +30,7 @@ def lyapunov_estimate(model,initial_in,tests = 100, delta_naught = 0.1, measure_
     lamda /= tests
     return lamda
 
-def config_space(model,noise_factor = 10, tests = 20, matrix_size = 500):
+def config_space(model,noise_factor = 10, tests = 20, matrix_size = 500,convergence = 0.01):
     KR,GR,MC=0,0,0
     #feed and measure random seq of input
     inputs = np.random.rand(tests*matrix_size,model.d_m)
@@ -42,6 +42,7 @@ def config_space(model,noise_factor = 10, tests = 20, matrix_size = 500):
         kernel = subsamples[round(i):round(i)+matrix_size]
         KR += np.linalg.matrix_rank(kernel)
     KR /=tests
+    KR = round(KR)
     noisy_outputs, noisy_subsamples = model.run(noisy_inputs,tests*matrix_size,0)
     #GR
     for i in np.linspace(0,len(outputs),num=tests):
@@ -49,8 +50,8 @@ def config_space(model,noise_factor = 10, tests = 20, matrix_size = 500):
         kernel = noisy_subsamples[round(i):round(i)+matrix_size]
         GR += np.linalg.matrix_rank(kernel)
     GR /=tests
+    GR = round(GR)
     #MC
-
     return KR,GR,MC
 
 def determination(v1,v2):
