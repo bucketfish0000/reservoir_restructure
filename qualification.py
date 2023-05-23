@@ -15,14 +15,13 @@ def learning_curve(model_list,test_length,data):
         loss_list.append(loss)
     return loss_list
 
-def lyapunov_estimate(model,initial_in,tests = 100, delta_naught = 0.1, measure_time = 1000):
+def lyapunov_estimate(model,initial_in,tests = 100, delta_naught = 0.1, measure_time = 1000,dimension=4):
     lamda = 0
     dimension = model.d_m
     test_data_0 = [initial_in]
     out_list_0,_ = model.run(test_data_0,1,measure_time)
     for i in range(tests):
-        delta_in = delta_naught*np.random.rand(4)
-        delta_in[3] =0
+        delta_in = delta_naught*np.random.rand(dimension)
         test_data = [np.add(initial_in,delta_in)]
         out_list,_ = model.run(test_data,1,measure_time)
         #print(out_list[-1]-out_list_0[-1])
