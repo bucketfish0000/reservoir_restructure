@@ -45,10 +45,8 @@ class ESNModel:
     def initialize_state(self):
         return torch.tensor(np.random.rand(self.d_r))
 
-    def training(self, data, qualification=0):
+    def training(self, training_data,expected_data,qualification=0):
         ### initialize ###
-        training_data = data[:self.training_time]
-        expected_data = data[1:self.training_time+1]
         subtrained = []
         input_count = 0
 

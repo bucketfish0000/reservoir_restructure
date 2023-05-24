@@ -12,7 +12,8 @@ def learning_curve(model_list, test_length, data):
         output, _ = model.run(data, test_length, 0)
         # print(output.shape)
         data_slice = data
-        loss = np.linalg.norm(output - data_slice, axis=1).mean()
+        loss = utils.MSE(output,data_slice)
+        #print(loss)
         loss_list.append(loss)
     return loss_list
 
@@ -33,13 +34,13 @@ def lyapunov_estimate(
         lamda_list.append(
             1
             / measure_time
-            * np.log(np.linalg.norm(np.divide(out_list[-1] - out_list_0[-1], delta_in)))
+            * np.log(np.linalg.norm(np.divide(out_list[-1][:dimension-1] - out_list_0[-1][:dimension-1], delta_in[:dimension-1])))
         )
     # lamda /= tests
     return np.average(lamda_list)
 
 
-def config_space(model, noise_factor=10, tests=5, m=20, t=500, convergence=0.01):
+def config_space(model, noise_factor=10, tests=5, m=200, t=50, convergence=0.01):
     KR, GR, MC = 0, 0, 0
     # feed and measure random seq of input
     KR = rank(model, noise_factor=1, tests=tests, m=m, t=t, noise_function=None)
@@ -58,7 +59,7 @@ def random_feed(model, length, scale, noise_function=None):
     return outputs, subsamples
 
 
-def rank(model, noise_factor=1, tests=5, m=20, t=500, noise_function=None):
+def rank(model, noise_factor=1, tests=5, m=200, t=50, noise_function=None):
     rank_list = []
     for i in range(tests):
         kernel = []
@@ -73,7 +74,8 @@ def rank(model, noise_factor=1, tests=5, m=20, t=500, noise_function=None):
         rank_list.append(rank)
     return np.average(rank_list)
 
-def memory(model):
+def memory(model,data,max_k=100):
+    # TODO
     #MC
     # https://www.cs.bham.ac.uk/~pxt/PAPERS/scr_tnn.pdf section V
     '''
@@ -82,4 +84,14 @@ def memory(model):
     3.
     '''
     return None
+
+def memory_k(model,training_data,expected_data):
+    #TODO
+    '''
+    the model takes input input[0:t]
+    and tries to minimize difference(output[t],input[t-k])
+    '''
+    _,_,_= model.train(training_data,expected_data)
+    model.run()
+
 

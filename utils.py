@@ -137,3 +137,9 @@ def discrete_mackey_glass(
     sequence.append(list(x[n * discard :: sample]))
     # sequence = np.array(sequence)
     return np.array(sequence).T, time
+
+def MSE(v1, v2):
+    error = 0
+    for i in range(len(v1)):
+        error += (np.linalg.norm(v1[i]-v2[i]))**2
+    return error / len(v1)
