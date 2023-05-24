@@ -88,8 +88,9 @@ def memory(model,data,max_k=100):
 def memory_k(model,training_data,expected_data):
     #TODO
     '''
-    the model takes input input[0:t]
-    and tries to minimize difference(output[t],input[t-k])
+    training input: input[t0,t']
+    training reference: input[t0-k,t'-k] (???) 
+    
     '''
     _,_,_= model.train(training_data,expected_data)
     model.run()
