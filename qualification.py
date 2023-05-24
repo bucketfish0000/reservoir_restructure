@@ -29,31 +29,32 @@ def lyapunov_estimate(model,initial_in,tests = 100, delta_naught = 0.1, measure_
     lamda /= tests
     return lamda
 
-def config_space(model,noise_factor = 10, tests = 20, matrix_size = 500,convergence = 0.01):
+def config_space(model,noise_factor = 10, tests = 5, m = 20, t = 500,convergence = 0.01):
     KR,GR,MC=0,0,0
     #feed and measure random seq of input
-    inputs = np.random.rand(tests*matrix_size,model.d_m)
-    noisy_inputs = noise_factor*np.random.rand(tests*matrix_size,model.d_m)
-    outputs,subsamples = model.run(inputs,tests*matrix_size,0)
-    #KR
-    for i in np.linspace(0,len(outputs),num=tests):
-        if i==len(outputs): break
-        kernel = subsamples[round(i):round(i)+matrix_size]
-        KR += np.linalg.matrix_rank(kernel)
-    KR /=tests
-    KR = round(KR)
-    noisy_outputs, noisy_subsamples = model.run(noisy_inputs,tests*matrix_size,0)
-    #GR
-    for i in np.linspace(0,len(outputs),num=tests):
-        if i==len(outputs): break
-        kernel = noisy_subsamples[round(i):round(i)+matrix_size]
-        GR += np.linalg.matrix_rank(kernel)
-    GR /=tests
-    GR = round(GR)
-    #MC
+    KR = rank(model,noise_factor = 1, tests = 5, m = 20, t = 500,noise_function = None)
+    GR = rank(model,noise_factor = 5, tests = 5, m = 20, t = 500,noise_function = np.square)
+    
     return KR,GR,MC
 
-def determination(v1,v2):
-    return (np.cov([v1,v2])**2)/((np.var(v1)**2)*(np.var(v2)**2))
+def random_feed(model,length,scale,noise_function = None):
+    #feeds one random input of length <length> through model <model>
+    inputs = scale*np.random.rand(length,model.d_m)
+    if noise_function != None:
+        inputs = noise_function(inputs)
+    outputs,subsamples = model.run(inputs,length,0)
+    #return output sequence and subsample sequence of model reservoir states
+    return outputs, subsamples
+
+def rank(model,noise_factor = 1, tests = 5, m = 20, t = 500,noise_function = None):
+    rank_list = []
+    for i in range(tests):
+        kernel = []
+        for j in range(m):
+            out,sub = random_feed(model,length = t,scale = noise_factor,noise_function=noise_function)
+            kernel.append(sub[-1])
+        rank = np.linalg.matrix_rank(kernel) 
+        rank_list.append(rank)
+    return np.average(rank_list)
 
 

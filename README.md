@@ -12,35 +12,7 @@ TODO:
 
     - data pipelines
 
-
-----
-
-form of configs: (expired)
-
-    {
-        "system": {
-            "dimension": <int> dimension of system 
-            "length": <int>,
-            "d_t": <float>,
-            "function": <string> func name and call path to generate time-system
-        },
-        "reservoir": {
-            "dimension": <int>,
-            "degree": <int> avg/expected degree,python -m pip install --upgrade pip
-            "subsample": <int> # of subsampled dimensions (None for no subsampling)
-            "network": <string> func name and call path to generate r network (None for default random)
-        },
-        "params": {
-            "sigma": <int> input layer entry range (-sigma,sigma), 
-            "rho": <float> reservoir spectral radius (0<rho<1),
-            "train time": <int>,
-            "lamda": <float> regression I-factor,
-            "bias": <float> regression bias,
-            "f": <float> evaluation error standard
-        }
-    }
-
-----
+------
 
 qualification of network:
 
@@ -50,7 +22,7 @@ qualification of network:
 
 -Learning Curve: sensitivity of model output on training size; loss vs. % of sequence trained
  
--KR: lin. separability of resevoir output. rank of readout/subsample sequence from reservoir in response to finite random input sequence
+-KR: lin. separability of reservoir output. rank of readout/subsample sequence from reservoir in response to finite random input sequence
 multi-measure and average/smoothened
 
 -GR: 
@@ -71,8 +43,8 @@ calculated using the same rank measure as kernel quality, however each input str
 is a noisy version of the original ui . A low generalization rank symbolizes a robust ability to map
 similar inputs to similar reservoir states.`
 
-    <https://arxiv.org/pdf/1810.07135.pdf>
-    <https://www.sciencedirect.com/science/article/pii/S0893608007000433?via%3Dihub> - 5, 6 and appendix-c
+<https://arxiv.org/pdf/1810.07135.pdf>
+<https://www.sciencedirect.com/science/article/pii/S0893608007000433?via%3Dihub> - 5, 6 and appendix-c
 
 -MC: Memory capacity is bounded by ESN size but tighter bound gives by summing up the correlation of network state to history at each point.
 
