@@ -6,7 +6,10 @@ import torch
 
 
 def integration_lorenz(
-    params=(10, 28, 8 / 3), init=(25, 25, 25), epoch=300, delta_t=0.01,
+    params=(10, 28, 8 / 3),
+    init=(25, 25, 25),
+    epoch=300,
+    delta_t=0.01,
 ):
     lorenz = solve_ivp(
         dynamic_lorenz,
@@ -18,7 +21,9 @@ def integration_lorenz(
     bias_value = 1.0
     time = np.linspace(0, epoch * delta_t, epoch)
     lorenz_system = lorenz.sol(time)
-    lorenz_system = np.append(lorenz_system,[np.full(len(lorenz_system[0]),bias_value)],axis=0)
+    lorenz_system = np.append(
+        lorenz_system, [np.full(len(lorenz_system[0]), bias_value)], axis=0
+    )
     return lorenz_system.T, time
 
 
@@ -59,6 +64,28 @@ def evaluation(start_index, end_index, f, prediction, reference):
     return errors
 
 
+def system_lyapunov(
+    dimension,
+    params,
+    tests,
+    init,
+    delta_naught=1e-5,
+    measure_time=1000,
+    delta_t=0.1,
+    system=dynamic_lorenz,
+):
+    lamda_list = []
+    out_0, _ = time_dynamic_system(params, init, measure_time, delta_t, system)
+    for i in range(tests):
+        delta_in = delta_naught * np.random.rand(dimension)
+        init_test = tuple(np.add(init, delta_in))
+        out, _ = time_dynamic_system(params, init_test, measure_time, delta_t, system)
+        lamda_list.append(
+            1
+            / measure_time
+            * np.log(np.linalg.norm(np.divide(out_0.T[-1] - out.T[-1], delta_in)))
+        )
+    return np.average(lamda_list)
 
 
 def plot_time_sequence(
