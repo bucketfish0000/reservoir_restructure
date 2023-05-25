@@ -45,7 +45,7 @@ class ESNModel:
     def initialize_state(self):
         return torch.tensor(np.random.rand(self.d_r))
 
-    def training(self, training_data,expected_data,qualification=0):
+    def training(self,training_data,expected_data,qualification):
         ### initialize ###
         subtrained = []
         input_count = 0
@@ -61,7 +61,6 @@ class ESNModel:
             )
             ### record 
             observation_list.append(sample)
-            #print(input_count,input_count%(self.training_time/qualification))
             ### record subtrained for learning curve
             if qualification != 0 and (input_count%(self.training_time/qualification))==0:
                 sub_ESN = copy.deepcopy(self)
@@ -69,6 +68,7 @@ class ESNModel:
                 sub_ESN.training_time=input_count
                 subtrained.append(sub_ESN)
 
+        
         loss,loss_before_training = self.ridge_output_layer(observation_list,expected_data)
 
         return loss, loss_before_training, subtrained
@@ -95,6 +95,7 @@ class ESNModel:
         )
         #print(recorded_samples.T.shape,reference_outputs.shape)
         loss = np.linalg.norm(reference_outputs - recorded_samples @ self.W_out, axis=1).mean()
+        
         return loss, loss_before_training
     
     def forward(self, prev, input):

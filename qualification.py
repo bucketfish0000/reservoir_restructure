@@ -83,16 +83,34 @@ def memory(model,data,max_k=100):
     2.train model
     3.
     '''
-    return None
+    MC=0
+    for k in range(1,max_k):
+        model_copy = copy.deepcopy(model)
+        input = data[k:]
+        reference = data[:len(data)-k]
+        MC_k = memory_k(model_copy,input,reference,k)
+        MC+=MC_k
+    return MC
 
-def memory_k(model,training_data,expected_data):
+def memory_k(model,training_data,expected_data,k):
     #TODO
     '''
     training input: input[t0,t']
     training reference: input[t0-k,t'-k] (???) 
-    
     '''
-    _,_,_= model.train(training_data,expected_data)
-    model.run()
+    #do training
+    _,_,_= model.training(training_data,expected_data,qualification=0)
+    #calculate correlation coefficient
+    output,_= model.run(training_data,len(training_data),0)
+    correlation_list = []
+    for t in range(k,len(training_data)):
+        corr = correlation(expected_data[t],output[t],training_data[t])
+        correlation_list.append(corr)
+    return np.average(correlation_list)
+
+def correlation(in_t_minus_k,out_t,in_t):
+    cov_1 = np.cov(in_t_minus_k,out_t)
+    cov_2 = np.cov(in_t,out_t)
+    return (cov_1[0,1])**2/(cov_2[0,0]*cov_2[1,1])
 
 
