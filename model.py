@@ -48,6 +48,7 @@ class ESNModel:
     def training(self,training_data,expected_data,qualification):
         ### initialize ###
         subtrained = []
+        subtrain_losses = []
         input_count = 0
 
 

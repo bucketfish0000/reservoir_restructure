@@ -6,17 +6,18 @@ import torch
 import copy
 
 
-def learning_curve(model_list, test_length, data):
-    loss_list = []
+def learning_curve(model_list,train_data,train_ref,test_data,test_ref):
+    train_rating_list = []
+    test_rating_list = []
     for model in model_list:
-        output, _ = model.run(data, test_length, 0)
-        # print(output.shape)
-        data_slice = data
-        loss = utils.MSE(output,data_slice)
-        #print(loss)
-        loss_list.append(loss)
-    return loss_list
+        train_set_output, _ = model.run(train_data, len(train_data), 0)
+        train_loss = utils.MSE(train_set_output,train_ref)
+        train_rating_list.append(train_loss)
 
+        test_set_output, _ = model.run(test_data, len(test_data), 0)
+        test_loss = utils.MSE(test_set_output,test_ref)
+        test_rating_list.append(test_loss)
+    return train_rating_list,test_rating_list
 
 def lyapunov_estimate(
     model, initial_in, tests=100, delta_naught=1e-5, measure_time=1000, dimension=4
